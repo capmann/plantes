@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#2d5016">
+    <title>Mes Plantes</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+</head>
+<body>
+    <div id="app">
+
+        <!-- ── Plant List View ───────────────────────────────── -->
+        <div id="view-list" class="view active">
+            <header class="top-bar">
+                <h1>Mes Plantes</h1>
+            </header>
+            <div id="plant-list" class="plant-grid"></div>
+            <label class="fab" title="Ajouter une plante">
+                +
+                <input type="file" id="fab-photo-input" accept="image/*" capture="environment" hidden>
+            </label>
+        </div>
+
+        <!-- ── Plant Detail View ─────────────────────────────── -->
+        <div id="view-detail" class="view">
+            <header class="top-bar">
+                <button id="btn-back" class="btn-icon">&larr;</button>
+                <h1 id="detail-title"></h1>
+            </header>
+
+            <div class="detail-scroll">
+                <!-- Hero photo -->
+                <div id="hero-photo" class="hero-photo"></div>
+
+                <!-- Photo strip -->
+                <div class="photo-strip-wrapper">
+                    <div id="photo-strip" class="photo-strip"></div>
+                    <label class="photo-strip-add" title="Ajouter une photo">
+                        +
+                        <input type="file" id="add-photo-input" accept="image/*" capture="environment" hidden>
+                    </label>
+                </div>
+
+                <!-- Species -->
+                <div id="species-line" class="species-line"></div>
+
+                <!-- ── Section : Comment va ma plante ? ──────── -->
+                <section class="section">
+                    <h2>Comment va ma plante ?</h2>
+                    <div id="checkup-latest" class="checkup-latest"></div>
+                    <label class="checkup-btn" id="checkup-btn-label">
+                        <span>📸</span> Faire un bilan de sante
+                        <input type="file" id="checkup-photo-input" accept="image/*" capture="environment" hidden>
+                    </label>
+                    <div id="checkup-history-wrapper" style="display:none">
+                        <button id="btn-toggle-checkup-history" class="btn-link" style="margin-top:12px">
+                            Voir l'historique des bilans
+                        </button>
+                        <div id="checkup-history" class="checkup-history" style="display:none"></div>
+                    </div>
+                </section>
+
+                <!-- ── Section : Arrosage ────────────────────── -->
+                <section class="section">
+                    <h2>Arrosage</h2>
+                    <div class="care-card">
+                        <div id="last-watered" class="watering-info"></div>
+                        <button id="btn-water" class="btn-water">
+                            <span class="water-icon">💧</span>
+                            Arroser maintenant
+                        </button>
+                    </div>
+                    <ul id="watering-history" class="watering-list"></ul>
+                </section>
+
+                <!-- ── Section : Rempotage ────────────────────── -->
+                <section class="section">
+                    <h2>Rempotage</h2>
+                    <div class="care-card repot-card">
+                        <div id="last-repotted" class="watering-info"></div>
+                        <button id="btn-repot" class="btn-repot">
+                            <span class="repot-icon">🪴</span>
+                            Rempoter maintenant
+                        </button>
+                    </div>
+                    <ul id="repotting-history" class="watering-list repotting-list"></ul>
+                </section>
+
+                <!-- ── Section : Guide d'entretien ───────────── -->
+                <section class="section">
+                    <h2>Guide d'entretien</h2>
+                    <div id="guide-display" class="guide-cards"></div>
+                    <button id="btn-edit-guide" class="btn-link" style="display:none">Modifier le guide</button>
+                    <div id="guide-editor" class="guide-editor" style="display:none"></div>
+                </section>
+
+                <!-- ── Section : Questions ───────────────────── -->
+                <section class="section">
+                    <h2>Questions</h2>
+                    <div id="ai-unavailable" class="notice" style="display:none">
+                        Configure ANTHROPIC_API_KEY pour poser des questions.
+                    </div>
+                    <div id="ask-form" class="ask-form">
+                        <textarea id="question-input" rows="3" placeholder="Ex: Les feuilles jaunissent, que faire ?"></textarea>
+                        <div class="ask-actions">
+                            <label class="btn-attach" title="Joindre une photo">
+                                📷
+                                <input type="file" id="question-photo-input" accept="image/*" capture="environment" hidden>
+                            </label>
+                            <div id="question-photo-preview" class="photo-preview-small"></div>
+                            <button id="btn-ask" class="btn-primary">Demander</button>
+                        </div>
+                    </div>
+                    <div id="conversations" class="conversation-list"></div>
+                </section>
+
+                <!-- ── Section : Supprimer ───────────────────── -->
+                <section class="section section-delete">
+                    <button id="btn-delete-plant" class="btn-delete">
+                        Supprimer cette plante
+                    </button>
+                </section>
+            </div>
+        </div>
+
+        <!-- ── Manual Add Modal (fallback sans IA) ───────────── -->
+        <div id="modal-plant" class="modal">
+            <div class="modal-content">
+                <h2>Nouvelle plante</h2>
+                <p class="modal-hint">L'IA n'est pas disponible. Remplis les infos manuellement.</p>
+                <label>Nom *
+                    <input type="text" id="input-name" placeholder="Ex: Monstera du salon" required>
+                </label>
+                <label>Espece
+                    <input type="text" id="input-species" placeholder="Ex: Monstera deliciosa">
+                </label>
+                <div class="modal-actions">
+                    <button id="btn-cancel-modal" class="btn-secondary">Annuler</button>
+                    <button id="btn-save-plant" class="btn-primary">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading overlay -->
+        <div id="loading" class="loading-overlay" style="display:none">
+            <div class="loading-inner">
+                <div class="spinner"></div>
+                <p id="loading-text" class="loading-text"></p>
+            </div>
+        </div>
+
+        <!-- Photo lightbox -->
+        <div id="lightbox" class="lightbox" style="display:none">
+            <button id="lightbox-close" class="lightbox-close">&times;</button>
+            <img id="lightbox-img" src="" alt="">
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
